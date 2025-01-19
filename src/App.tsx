@@ -1,7 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+
+import { useState, useRef } from 'react'
 import './App.css'
 import * as Slider from '@radix-ui/react-slider';
-import {YT, PlayerState, YTPlayer} from "./types/youtube.ts";
+import {PlayerState, YT, YTPlayer} from "./types/youtube.ts";
+import { YoutubePlayer } from  "./component/VideoPlayer/YoutubePlayer.tsx"
+import VideoTimePicker from "./component/VideoTimePicker/VideoTimePicker.tsx"
 
 declare global {
     interface Window {
@@ -12,47 +15,16 @@ declare global {
 
 function App(): JSX.Element {
     const [isActive, setIsActive] = useState<boolean>(false);
-    const playerRef = useRef<YTPlayer | null>(null);
+    const [duration, setDuration] = useState<number>(100);
     const [values, setValues] = useState([0, 100]); // Start and end values
-    const videoId = 'dQw4w9WgXcQ'; // Store video ID as a constant
+    const playerRef = useRef<YTPlayer>(null);  // Now using YTPlayer type directly
+    const videoId = 'dQw4w9WgXcQ';
 
-    useEffect((): (() => void) => {
-        const tag: HTMLScriptElement = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-
-        const firstScriptTag: HTMLScriptElement | null = document.getElementsByTagName('script')[0];
-        if (firstScriptTag?.parentNode) {
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        }
-
-        window.onYouTubeIframeAPIReady = (): void => {
-            playerRef.current = new window.YT.Player('youtube-player', {
-                videoId: videoId,
-                playerVars: {
-                    autoplay: 0,
-                    controls: 1,
-                },
-                events: {
-                    onReady: (event: { target: YTPlayer }): void => {
-                        console.log('Player is ready');
-                    },
-                    onStateChange: (event: { data: number }): void => {
-                        if (event.data === PlayerState.UNSTARTED || event.data === PlayerState.ENDED) {
-                            setIsActive(false);
-                        } else if (event.data === PlayerState.PLAYING) {
-                            setIsActive(true);
-                        }
-                    }
-                }
-            });
-        };
-
-        return (): void => {
-            if (playerRef.current) {
-                playerRef.current.destroy();
-            }
-        };
-    }, []);
+    const handlePlayerReady = (newDuration: number): void => {
+        console.log('Player is ready with duration:', newDuration);
+        setDuration(newDuration);
+        setValues([0, newDuration]);
+    };
 
     const toggleActive = (): void => {
         const player = playerRef.current;
@@ -65,16 +37,18 @@ function App(): JSX.Element {
             }
             player.playVideo();
         } else {
-            player.stopVideo(); // This will properly stop the video and prevent further downloads
+            player.stopVideo();
         }
-        // State will be updated by onStateChange event handler
     };
 
     const onSliderValueChange = ([left, right]: number[]): void => {
+        const player = playerRef.current;
+        if (!player) return;
+
         if (values[0] === left) {
-            playerRef.current?.seekTo(right, true);
+            player.seekTo(right, true);
         } else {
-            playerRef.current?.seekTo(left, true);
+            player.seekTo(left, true);
         }
         setValues([left, right]);
         console.log('Left:', left, 'Right:', right);
@@ -92,14 +66,22 @@ function App(): JSX.Element {
                     {isActive ? 'Stop' : 'Play'}
                 </button>
             </div>
+            
+            <YoutubePlayer
+                ref={playerRef}
+                videoId={videoId}
+                onPlayerReady={handlePlayerReady}
+                onStateChange={setIsActive}
+            />
+
             <div className="video-controls">
                 <Slider.Root
                     className="slider-root"
                     value={values}
                     onValueChange={onSliderValueChange}
                     min={0}
-                    max={100}
-                    step={1}
+                    max={duration}
+                    step={0.001}
                     aria-label="Video Slider"
                 >
                     <Slider.Track className="slider-track">
@@ -109,8 +91,19 @@ function App(): JSX.Element {
                     <Slider.Thumb className="slider-thumb"/>
                 </Slider.Root>
             </div>
-            <div className="video-container">
-                <div id="youtube-player"></div>
+
+            <div>
+                <VideoTimePicker
+                    value={values[0]}
+                    onChange={(e : number)=> onSliderValueChange([e, values[1]])}
+                    maxDuration={duration}
+                    ></VideoTimePicker>
+
+                <VideoTimePicker
+                    value={values[1]}
+                    onChange={(e : number)=> onSliderValueChange([values[0], e])}
+                    maxDuration={duration}
+                ></VideoTimePicker>
             </div>
         </>
     );

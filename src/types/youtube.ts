@@ -36,6 +36,7 @@ export interface YTPlayer {
     destroy(): void;
     seekTo(seconds: number, allowSeekAhead: boolean): void;
     loadVideoById(videoId: string): void;
+    getDuration(): number;
     PlayerState: PlayerState;
 }
 
