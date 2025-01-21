@@ -1,6 +1,6 @@
 import VideoTimePicker from "../VideoTimePicker/VideoTimePicker.tsx";
 import * as Slider from "@radix-ui/react-slider";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 interface VideoEditorProps {
     // id: string;
@@ -10,8 +10,7 @@ interface VideoEditorProps {
 }
 
 const VideoEditor: React.FC<VideoEditorProps> = ({duration, onTimeChange}) => {
-    const [values, setValues] = useState([0, 100]); // Start and end values
-
+    const [values, setValues] = useState([0, duration]); // Start and end values
     const onSliderValueChange = ([left, right]: number[]): void => {
 
         if (values[0] === left) {
@@ -22,7 +21,9 @@ const VideoEditor: React.FC<VideoEditorProps> = ({duration, onTimeChange}) => {
         setValues([left, right]);
         console.log('Left:', left, 'Right:', right);
     };
-
+    useEffect(() => {
+        setValues([values[0],duration])
+    }, [duration]);
 
 
 
