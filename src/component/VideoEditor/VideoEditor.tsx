@@ -3,14 +3,21 @@ import * as Slider from "@radix-ui/react-slider";
 import {useEffect, useState} from "react";
 
 interface VideoEditorProps {
-    // id: string;
+    id: string;
     duration :  number;
     onTimeChange: (current_frame: number) => void;
-
+    handleDelete: () => void;
+    handleDownload: () => void;
+    start : number;
+    end: number;
 }
 
-const VideoEditor: React.FC<VideoEditorProps> = ({duration, onTimeChange}) => {
+const VideoEditor: React.FC<VideoEditorProps> = ({duration, onTimeChange,handleDelete,handleDownload,  start, end}) => {
     const [values, setValues] = useState([0, duration]); // Start and end values
+    useEffect(() => {
+        values[0] = start;
+        values[1] = end;
+    }, []);
     const onSliderValueChange = ([left, right]: number[]): void => {
 
         if (values[0] === left) {
@@ -58,6 +65,20 @@ const VideoEditor: React.FC<VideoEditorProps> = ({duration, onTimeChange}) => {
                     onChange={(e: number) => onSliderValueChange([values[0], e])}
                     maxDuration={duration}
                 ></VideoTimePicker>
+            </div>
+            <div>
+                <button
+                    onClick={handleDownload}
+                   type="button"
+                   className="play-button"
+                >Download</button>
+
+                <button
+                    onClick={handleDelete}
+                    type="button"
+                    className="play-button"
+                >Delete</button>
+
             </div>
         </div>
     );
