@@ -1,41 +1,41 @@
 import VideoTimePicker from "../VideoTimePicker/VideoTimePicker.tsx";
 import * as Slider from "@radix-ui/react-slider";
 import {useEffect, useState} from "react";
-
+import './styles.css';
 interface VideoEditorProps {
     id: string;
     duration :  number;
-    onTimeChange: (current_frame: number) => void;
+    onTimeChange: (current_frame: number, start: number, end: number) => void;
     handleDelete: () => void;
     handleDownload: () => void;
     start : number;
     end: number;
+    isSelected: boolean;
 }
 
-const VideoEditor: React.FC<VideoEditorProps> = ({duration, onTimeChange,handleDelete,handleDownload,  start, end}) => {
-    const [values, setValues] = useState([0, duration]); // Start and end values
+const VideoEditor: React.FC<VideoEditorProps> = ({duration, onTimeChange,handleDelete,handleDownload,  start, end, isSelected}) => {
+    const [values, setValues] = useState([start, end]); // Start and end values
     useEffect(() => {
+        console.log("in video editorstart:", start, "end:", end);
         values[0] = start;
         values[1] = end;
     }, []);
     const onSliderValueChange = ([left, right]: number[]): void => {
 
         if (values[0] === left) {
-            onTimeChange(right);
+            onTimeChange(right, left, right);
         } else {
-            onTimeChange(left);
+            onTimeChange(left, left, right);
         }
         setValues([left, right]);
-        console.log('Left:', left, 'Right:', right);
     };
-    useEffect(() => {
-        setValues([values[0],duration])
-    }, [duration]);
 
 
 
     return (
         <div>
+            <div>
+            </div>
             <div className="video-controls">
                 <Slider.Root
                     className="slider-root"
@@ -47,10 +47,11 @@ const VideoEditor: React.FC<VideoEditorProps> = ({duration, onTimeChange,handleD
                     aria-label="Video Slider"
                 >
                     <Slider.Track className="slider-track">
-                        <Slider.Range className="slider-range"/>
+                        <Slider.Range className="slider-range"
+                                        color='black'/>
                     </Slider.Track>
-                    <Slider.Thumb className="slider-thumb"/>
-                    <Slider.Thumb className="slider-thumb"/>
+                    {isSelected && <Slider.Thumb className="slider-thumb"/>}
+                    {isSelected && <Slider.Thumb className="slider-thumb"/>}
                 </Slider.Root>
             </div>
             <div>
@@ -67,18 +68,20 @@ const VideoEditor: React.FC<VideoEditorProps> = ({duration, onTimeChange,handleD
                 ></VideoTimePicker>
             </div>
             <div>
+                {isSelected &&
                 <button
                     onClick={handleDownload}
                    type="button"
                    className="play-button"
                 >Download</button>
-
+                }
+                {isSelected &&
                 <button
                     onClick={handleDelete}
                     type="button"
                     className="play-button"
                 >Delete</button>
-
+                }
             </div>
         </div>
     );

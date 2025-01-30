@@ -1,0 +1,85 @@
+@import "@radix-ui/colors/black-alpha.css";
+@import "@radix-ui/colors/violet.css";
+/* VideoEditor styles.css */
+.video-controls {
+	padding: 20px;
+	width: 100%;
+	max-width: 600px;
+	margin: 0 auto;
+}
+
+/* Slider styles */
+.slider-root {
+	position: relative;
+	display: flex;
+	align-items: center;
+	user-select: none;
+	touch-action: none;
+	width: 100%;
+	height: 20px;
+}
+
+.slider-track {
+	background-color: #e2e2e2;
+	position: relative;
+	flex-grow: 1;
+	border-radius: 9999px;
+	height: 4px;
+}
+
+.slider-range {
+	position: absolute;
+	background-color: #2563eb;
+	border-radius: 9999px;
+	height: 100%;
+}
+
+.slider-thumb {
+	display: block;
+	width: 16px;
+	height: 16px;
+	background-color: white;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	border-radius: 50%;
+	border: 2px solid #2563eb;
+	transition: background-color 0.2s;
+}
+
+.slider-thumb:hover {
+	background-color: #f8f8f8;
+}
+
+.slider-thumb:focus {
+	outline: none;
+	box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+}
+
+/* Button styles */
+.play-button {
+	background-color: #2563eb;
+	color: white;
+	padding: 8px 16px;
+	border-radius: 6px;
+	border: none;
+	margin: 8px;
+	cursor: pointer;
+	font-size: 14px;
+	transition: background-color 0.2s;
+}
+
+.play-button:hover {
+	background-color: #1d4ed8;
+}
+
+.play-button:focus {
+	outline: none;
+	box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+}
+
+/* Time picker container */
+div:has(> .VideoTimePicker) {
+	display: flex;
+	gap: 16px;
+	margin: 16px 0;
+	justify-content: center;
+}
