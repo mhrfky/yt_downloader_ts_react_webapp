@@ -17,15 +17,13 @@ function App(): JSX.Element {
     const [isActive, setIsActive]               = useState<boolean>(false);
     const [duration, setDuration]               = useState<number>(100);
     const [videoId, setVideoId]                 = useState<string>("dQw4w9WgXcQ")
-    const [newUrl, setNewUrl]                   = useState<string>('')
+    const [newUrl, setNewUrl]                   = useState<string>('') //redundant to have url with videoId
     const [selectedClipId, setSelectedClipId]   = useState<string | null>(null);
     const [videoClips, setvideoClips]           = useState<VideoClip[]>([]);
-    const [currValues, setCurrValues]           = useState([0, duration]); // Start and end values
 
     const playerRef                             = useRef<YTPlayer>(null);  // Now using YTPlayer type directly
     const storageRef                            = useRef(new CookieVideoStorage());
     const inputRef                              = useRef<HTMLInputElement>(null);
-    const {updateClip}                          = useCookieVideoStorage(videoId);
     const storage                               = useCookieVideoStorage(videoId);
 
 
@@ -53,6 +51,7 @@ function App(): JSX.Element {
 
     const handleNewUrl  = async (): Promise<void> => {
         if (!newUrl) return;
+
         const result = await validateYouTubeVideo(newUrl);
         if (result.valid && result.videoId) {
             console.log(`Valid video ID: ${result.videoId}`);
@@ -106,7 +105,6 @@ function App(): JSX.Element {
     useEffect(() => {
         storageRef.current.initVideo(videoId, {name: videoId, duration: duration});
         setvideoClips(storageRef.current.getClips(videoId));
-        console.log("activated at the mount");
     }, [videoId, duration]);
 
 

@@ -10,9 +10,33 @@ interface YoutubePlayerProps {
 const YoutubePlayer = forwardRef<YTPlayer, YoutubePlayerProps>(
     ({ videoId, onStateChange, onPlayerReady }, ref) => {
         const playerRef = useRef<YTPlayer | null>(null);
-        const [duration, setDuration] = useState<number>(0);
+        const intervalRef = useRef<number | null>(null);
 
-        // Load the YouTube API script once when the component mounts
+        // Cleanup interval on unmount
+        useEffect(() => {
+            return () => {
+                if (intervalRef.current) {
+                    clearInterval(intervalRef.current);
+                }
+            };
+        }, []);
+
+        const startDurationCheck = () => {
+            // Clear existing interval if any
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+
+            // Set up new interval
+            intervalRef.current = window.setInterval(() => {
+                const duration = playerRef.current?.getDuration();
+                if (duration && duration > 0) {
+                    onPlayerReady(duration);
+                    clearInterval(intervalRef.current!);
+                }
+            }, 500);
+        };
+
         useEffect(() => {
             const tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
@@ -26,13 +50,11 @@ const YoutubePlayer = forwardRef<YTPlayer, YoutubePlayerProps>(
                 playerRef.current = new window.YT.Player('youtube-player', {
                     videoId: videoId,
                     playerVars: {
-                        autoplay: 0,
+                        autoplay: 1,
                         controls: 1,
                     },
                     events: {
                         onReady: (event: { target: YTPlayer }) => {
-                            onPlayerReady(event.target.getDuration());
-                            console.log('Player is ready');
                             if (ref) {
                                 if (typeof ref === 'function') {
                                     ref(event.target);
@@ -40,18 +62,14 @@ const YoutubePlayer = forwardRef<YTPlayer, YoutubePlayerProps>(
                                     ref.current = event.target;
                                 }
                             }
+                            startDurationCheck();
                         },
                         onStateChange: (event: { data: number }) => {
-                            if (event.data === PlayerState.UNSTARTED || event.data === PlayerState.ENDED) {
+                            if (event.data === PlayerState.UNSTARTED) {
                                 onStateChange(false);
+                                startDurationCheck();
                             } else if (event.data === PlayerState.PLAYING) {
                                 onStateChange(true);
-
-                                // Capture the duration when the video starts playing
-                                const newDuration = playerRef.current?.getDuration();
-                                if (newDuration && !isNaN(newDuration)) {
-                                    setDuration(newDuration); // Update duration state
-                                }
                             }
                         }
                     }
@@ -67,19 +85,19 @@ const YoutubePlayer = forwardRef<YTPlayer, YoutubePlayerProps>(
 
         // Reinitialize the player when the videoId changes
         useEffect(() => {
+            console.log("videoId changed", videoId);
             if (playerRef.current) {
                 playerRef.current.loadVideoById(videoId);
-                playerRef.current.playVideo(); // Start playing to ensure duration is available
             }
         }, [videoId]);
 
         // Listen for changes in duration and stop the video when it updates
-        useEffect(() => {
-            if (duration > 0) {
-                playerRef.current?.stopVideo(); // Stop the video
-                onPlayerReady(duration); // Notify parent component of the new duration
-            }
-        }, [duration]);
+        // useEffect(() => {
+        //     console.log("duration changed", duration);
+        //     if (duration > 0) {
+        //         onPlayerReady(duration); // Notify parent component of the new duration
+        //     }
+        // }, [duration]);
 
         return (
             <div className="video-container">

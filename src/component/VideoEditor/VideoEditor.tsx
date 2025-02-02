@@ -16,7 +16,6 @@ interface VideoEditorProps {
 const VideoEditor: React.FC<VideoEditorProps> = ({duration, onTimeChange,handleDelete,handleDownload,  start, end, isSelected}) => {
     const [values, setValues] = useState([start, end]); // Start and end values
     useEffect(() => {
-        console.log("in video editorstart:", start, "end:", end);
         values[0] = start;
         values[1] = end;
     }, []);
@@ -45,6 +44,8 @@ const VideoEditor: React.FC<VideoEditorProps> = ({duration, onTimeChange,handleD
                     max={duration}
                     step={0.001}
                     aria-label="Video Slider"
+                    disabled={!isSelected} // Disable slider interaction
+
                 >
                     <Slider.Track className="slider-track">
                         <Slider.Range className="slider-range"
