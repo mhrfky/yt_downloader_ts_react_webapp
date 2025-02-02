@@ -4,7 +4,8 @@ import {PlayerState, YT, YTPlayer} from "./types/youtube.ts";
 import { YoutubePlayer } from  "./component/VideoPlayer/YoutubePlayer.tsx"
 import  {VideoEditor} from "./component/VideoEditor/VideoEditor.tsx";
 import {validateYouTubeVideo} from "./youtube_utils.ts";
-import CookieVideoStorage, {VideoClip} from "./component/VideoEditor/CookieVideoStorage.ts";    
+import CookieVideoStorage, {VideoClip} from "./component/VideoEditor/CookieVideoStorage.ts";
+import {useCookieVideoStorage} from "./hooks/useVideoStorage.ts";
 declare global {
     interface Window {
         YT: YT;
@@ -19,11 +20,13 @@ function App(): JSX.Element {
     const [newUrl, setNewUrl]                   = useState<string>('')
     const [selectedClipId, setSelectedClipId]   = useState<string | null>(null);
     const [videoClips, setvideoClips]           = useState<VideoClip[]>([]);
-    
+    const [currValues, setCurrValues]           = useState([0, duration]); // Start and end values
+
     const playerRef                             = useRef<YTPlayer>(null);  // Now using YTPlayer type directly
     const storageRef                            = useRef(new CookieVideoStorage());
     const inputRef                              = useRef<HTMLInputElement>(null);
-
+    const {updateClip}                          = useCookieVideoStorage(videoId);
+    const storage                               = useCookieVideoStorage(videoId);
 
 
 
@@ -83,21 +86,11 @@ function App(): JSX.Element {
         console.log('Download attempted on video ID:', clipId);
     };
 
-    const handleClipClick = (clipId: string) => {
-        console.log("video clips:", videoClips)
-
-        const prevClip = videoClips.find(clip => clip.id === selectedClipId);
-        if(selectedClipId != null || selectedClipId != undefined || prevClip != null || prevClip != undefined) { 
-            console.log("prevClip:", selectedClipId, "clipId:", clipId, "start:", prevClip?.start, "end:", prevClip?.end);
-            if(selectedClipId != clipId) storageRef.current.updateClip(videoId, selectedClipId, {start: prevClip?.start, end: prevClip?.end});   
-        }
-        setSelectedClipId(clipId);
-      };
 
 
-    const onTimeChange = (clipId: string, currentFrame: number, start: number, end: number): void => {
+    const handleTimeChange = (clipId: string, currentFrame: number, start: number, end: number): void => {
         if(clipId == null || clipId == undefined || clipId != selectedClipId) return;
-        playerRef.current?.seekTo(currentFrame, true); //TODO change here with more protected functions, remove forwardRef
+        playerRef.current?.seekTo(currentFrame, true); //TODO change here with more protected functions, remove forwardRef 
         setvideoClips(prevClips => 
             prevClips.map(clip => 
                 clip.id === clipId 
@@ -105,6 +98,8 @@ function App(): JSX.Element {
                     : clip
             )
         );
+        storage.updateClip(clipId, {start, end});
+        console.log("frame has been changed to", start, end);
     };
 
 
@@ -167,13 +162,13 @@ function App(): JSX.Element {
                     ? 'bg-blue-100 border-2 border-blue-500'
                     : 'hover:bg-gray-50'
                 }`}
-                onClick={() => handleClipClick(clip.id)}
+                onClick={() => setSelectedClipId(clip.id)}
                 >                        
                             <VideoEditor
                             id={clip.id}
                             duration={duration}
                             isSelected={selectedClipId === clip.id}
-                            onTimeChange={(currentFrame, start, end) => onTimeChange(clip.id, currentFrame, start, end)}
+                            onTimeChange={(currentFrame, start, end) => handleTimeChange(clip.id, currentFrame, start, end)}
                             handleDelete={() => handleDeleteClip(clip.id)}
                             handleDownload={() => handleDownloadClip(clip.id)}
                             start={clip.start}

@@ -32,7 +32,6 @@ interface VideoStorage {
     metadata: VideoMetadata;
     clips: VideoClip[];
 }
-
 /**
  * Class for managing video clips storage in browser cookies
  * @class CookieVideoStorage
@@ -158,7 +157,6 @@ class CookieVideoStorage {
                 };
                 this.setCookie(storageKey, JSON.stringify(videoStorage), 30);
             }
-            console.log("videoclips:", videoStorage.clips)
         }
     }
 
