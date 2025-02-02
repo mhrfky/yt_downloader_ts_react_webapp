@@ -91,13 +91,7 @@ const YoutubePlayer = forwardRef<YTPlayer, YoutubePlayerProps>(
             }
         }, [videoId]);
 
-        // Listen for changes in duration and stop the video when it updates
-        // useEffect(() => {
-        //     console.log("duration changed", duration);
-        //     if (duration > 0) {
-        //         onPlayerReady(duration); // Notify parent component of the new duration
-        //     }
-        // }, [duration]);
+
 
         return (
             <div className="video-container">
