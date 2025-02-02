@@ -16,7 +16,7 @@ interface VideoMetadata {
  * @property {number} end - End time of the clip in seconds
  * @property {string} id - Unique identifier for the clip
  */
-interface VideoClip {
+export interface VideoClip {
     start: number;
     end: number;
     id: string;
