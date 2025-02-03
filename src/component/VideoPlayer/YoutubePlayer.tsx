@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef } from "react";
 import { PlayerState, YTPlayer } from "../../types/youtube.ts";
 
 interface YoutubePlayerProps {

@@ -16,7 +16,7 @@ function App(): JSX.Element {
     const [isActive, setIsActive]               = useState<boolean>(false);
     const [duration, setDuration]               = useState<number>(100);
     const [videoId, setVideoId]                 = useState<string>("dQw4w9WgXcQ")
-    const [newUrl, setNewUrl]                   = useState<string>('') //redundant to have url with videoId
+    const [newUrl, setNewUrl]                   = useState<string>('') 
     const [selectedClipId, setSelectedClipId]   = useState<string | null>(null);
 
     const playerRef                             = useRef<YTPlayer>(null);  // Now using YTPlayer type directly
